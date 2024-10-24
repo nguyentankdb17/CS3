@@ -2,17 +2,19 @@ const Docker = require('dockerode');
 const axios = require('axios');
 const docker = new Docker();
 
-// async function checkContainerStatus(containerName) {
-//     try {
-//         const container = docker.getContainer(containerName);
-//         const containerInfo = await container.inspect();
-//         const isRunning = containerInfo.State.Running;
-//
-//         console.log(`Container ${containerName} is ${isRunning ? 'up' : 'down'}.`);
-//     } catch (error) {
-//         console.error(`Error checking container ${containerName}`, error.message);
-//     }
-// }
+let init = true;
+
+async function checkContainerStatus(containerName) {
+    try {
+        const container = docker.getContainer(containerName);
+        const containerInfo = await container.inspect();
+        const isRunning = containerInfo.State.Running;
+
+        console.log(`Container ${containerName} is ${isRunning ? 'up' : 'down'}.`);
+    } catch (error) {
+        console.error(`Error checking container ${containerName}`, error.message);
+    }
+}
 
 async function checkEndpointStatus(url) {
     try {
@@ -24,11 +26,16 @@ async function checkEndpointStatus(url) {
 }
 
 function monitorServices() {
-    // checkContainerStatus('gold-price-service');
-    // checkContainerStatus('exchange-rate-service');
+    checkContainerStatus('gold-price-container');
+    checkContainerStatus('exchange-rate-container');
 
     checkEndpointStatus('http://localhost:3001/gold-price');
     checkEndpointStatus('http://localhost:3002/exchange-rate');
+}
+
+if (init) {
+    monitorServices();
+    init = false;
 }
 
 // Kiểm tra mỗi 30 giây
