@@ -1,8 +1,20 @@
 const Docker = require('dockerode');
-const axios = require('axios');
 const docker = new Docker();
+const axios = require('axios');
+
+const express = require('express');
+const app = express();
+
+const port = 3003;
 
 let init = true;
+
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Hoặc chỉ định cụ thể tên miền thay vì '*'
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
 async function checkContainerStatus(containerName) {
     try {
@@ -10,33 +22,35 @@ async function checkContainerStatus(containerName) {
         const containerInfo = await container.inspect();
         const isRunning = containerInfo.State.Running;
 
-        console.log(`Container ${containerName} is ${isRunning ? 'up' : 'down'}.`);
+        // console.log(`Container ${containerName} is ${isRunning ? 'up' : 'down'}.`);
+        return isRunning ? "up" : "down";
     } catch (error) {
-        console.error(`Error checking container ${containerName}`, error.message);
+        // console.error(`Error checking container ${containerName}`, error.message);
+        return "error to check";
     }
 }
 
 async function checkEndpointStatus(url) {
     try {
         const response = await axios.get(url);
-        console.log(`Endpoint ${url} is ${response.status === 200 ? 'up' : 'down'}.`);
+        // console.log(`Endpoint ${url} is ${response.status === 200 ? 'up' : 'down'}.`);
+        return response.status === 200 ? "up" : "down";
     } catch (error) {
-        console.log(`Error checking endpoint ${url}`, error.message);
+        // console.log(`Error checking endpoint ${url}`, error.message);
+        return "error to check";
     }
 }
 
-function monitorServices() {
-    checkContainerStatus('gold-price-container');
-    checkContainerStatus('exchange-rate-container');
+app.get('/status', async (req, res) => {
+    const statuses = {
+        goldPriceContainer: await checkContainerStatus('gold-price-container'),
+        exchangeRateContainer: await checkContainerStatus('exchange-rate-container'),
+        goldPriceEndpoint: await checkEndpointStatus('http://localhost:3001/gold-price'),
+        exchangeRateEndpoint: await checkEndpointStatus('http://localhost:3002/exchange-rate'),
+    };
+    res.json(statuses);
+});
 
-    checkEndpointStatus('http://localhost:3001/gold-price');
-    checkEndpointStatus('http://localhost:3002/exchange-rate');
-}
-
-if (init) {
-    monitorServices();
-    init = false;
-}
-
-// Kiểm tra mỗi 30 giây
-setInterval(monitorServices, 30000);
+app.listen(port, () => {
+    console.log(`Status monitoring service running on http://localhost:${port}`);
+});

@@ -5,6 +5,13 @@ function App() {
   const [data, setData] = useState([]);
   const [exchangeRates, setExchangeRates] = useState([]);
 
+  const [status, setStatus] = useState({
+    goldPriceContainer: 'unknown',
+    exchangeRateContainer: 'unknown',
+    goldPriceEndpoint: 'unknown',
+    exchangeRateEndpoint: 'unknown',
+  });
+
   useEffect(() => {
     fetch("http://localhost:3001/gold-price")
     .then(response => response.json())
@@ -43,27 +50,34 @@ function App() {
       .catch(error => console.error('Error fetching exchange rate:', error));
   }, []);
 
+  useEffect(() => {
+    fetch("http://localhost:3003/status")
+        .then(response => response.json())
+        .then(data => setStatus(data))
+        .catch(error => console.error('Error fetching status:', error));
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
+      <div className="App">
         <h1>Health Monitoring Dashboard</h1>
-        <div>
+
+        <div className="goldPrice container">
           <h2>Gold Price</h2>
           <table>
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Purity</th>
-                <th>Fineness</th>
-                <th>Buy Price</th>
-                <th>Sell Price</th>
-                <th>Change</th>
-                <th>Date</th>
-              </tr>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Purity</th>
+              <th>Fineness</th>
+              <th>Buy Price</th>
+              <th>Sell Price</th>
+              <th>Change</th>
+              <th>Date</th>
+            </tr>
             </thead>
             <tbody>
-              {data.map((item) => (
+            {data.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
                   <td>{item.name}</td>
@@ -74,25 +88,26 @@ function App() {
                   <td>{item.change}</td>
                   <td>{item.date}</td>
                 </tr>
-              ))}
+            ))}
             </tbody>
           </table>
         </div>
-        <div>
+
+        <div className="exchangeRate container">
           <h2>Exchange Rate (VND)</h2>
           <table>
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>Currency Code</th>
-                <th>Currency Name</th>
-                <th>Buy</th>
-                <th>Transfer</th>
-                <th>Sell</th>
-              </tr>
+            <tr>
+              <th>ID</th>
+              <th>Currency Code</th>
+              <th>Currency Name</th>
+              <th>Buy</th>
+              <th>Transfer</th>
+              <th>Sell</th>
+            </tr>
             </thead>
             <tbody>
-              {exchangeRates.map((item) => (
+            {exchangeRates.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
                   <td>{item.currencyCode}</td>
@@ -101,12 +116,19 @@ function App() {
                   <td>{item.transfer}</td>
                   <td>{item.sell}</td>
                 </tr>
-              ))}
+            ))}
             </tbody>
           </table>
         </div>
-      </header>
-    </div>
+
+        <div className="status container">
+          <h2>Service Status</h2>
+          <p>Gold Price Container: {status.goldPriceContainer}</p>
+          <p>Exchange Rate Container: {status.exchangeRateContainer}</p>
+          <p>Gold Price Endpoint: {status.goldPriceEndpoint}</p>
+          <p>Exchange Rate Endpoint: {status.exchangeRateEndpoint}</p>
+        </div>
+      </div>
   );
 }
 
