@@ -117,7 +117,7 @@ function Resources() {
                 <div className="disk">
                     {diskData.map((disk, index) => (
                         <div key={index}>
-                            <em>Drive name: <strong>{disk.mounted}</strong></em>
+                            <em>Drive: <strong>{disk.mounted}</strong></em>
                             <p>Total: {disk.total} GB</p>
                             <p>Used: {disk.used} GB</p>
                             <p>Available: {disk.available} GB</p>
