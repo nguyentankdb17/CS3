@@ -16,7 +16,6 @@ function App() {
             {
                 label: 'Exchange Rate Service',
                 data: [],
-                borderColor: 'rgb(0,239,239)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 fill: true,
                 tension: 0.1,
