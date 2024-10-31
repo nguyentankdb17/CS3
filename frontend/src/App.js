@@ -2,9 +2,9 @@ import React from 'react';
 import {BrowserRouter as Router, Routes, Route, Link, useLocation} from 'react-router-dom';
 import './App.css';
 import Home from './Home';
-// import GoldPrice from './GoldPrice';
-// import ExchangeRate from './ExchangeRate';
 import Status from './Status';
+import Resources from "./Resources";
+import Traffic from "./Traffic";
 
 function Nav() {
   const location = useLocation();
@@ -18,10 +18,18 @@ function Nav() {
                   <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link>
               </li>
               <li>
-                  <Link to="/containerStatus" className={location.pathname === '/containerStatus' ? 'active' : ''}>Container Status</Link>
+                  <Link to="/containerStatus" className={location.pathname === '/containerStatus' ? 'active' : ''}>Container
+                      Status</Link>
               </li>
               <li>
-                  <Link to="/endpointStatus" className={location.pathname === '/endpointStatus' ? 'active' : ''}>Endpoint Status</Link>
+                  <Link to="/endpointStatus" className={location.pathname === '/endpointStatus' ? 'active' : ''}>Endpoint
+                      Status</Link>
+              </li>
+              <li>
+                  <Link to="/traffic" className={location.pathname === '/traffic' ? 'active' : ''}>Traffic</Link>
+              </li>
+              <li>
+                  <Link to="/resources" className={location.pathname === '/resources' ? 'active' : ''}>Resources</Link>
               </li>
           </ul>
       </nav>
@@ -35,12 +43,14 @@ function App() {
                 <Nav/>
 
                 <main>
-                    <h1>Health Monitoring Dashboard</h1>
+                <h1>Health Monitoring Dashboard</h1>
 
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/containerStatus" element={<Status />} />
                         <Route path="/endpointStatus" element={<Status />} />
+                        <Route path="/traffic" element={<Traffic />} />
+                        <Route path="/resources" element={<Resources />} />
                     </Routes>
                 </main>
             </div>
