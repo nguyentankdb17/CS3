@@ -6,6 +6,13 @@ const {exec} = require("child_process");
 const app = express();
 const PORT = 3004;
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); 
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+
 app.get('/resource-data/ram-usage', (req, res) => {
     const totalMemory = os.totalmem() / (1024 ** 3);
     const freeMemory = os.freemem() / (1024 ** 3);
