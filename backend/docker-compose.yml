@@ -1,0 +1,12 @@
+services:
+  gold-price-service:
+    container_name: gold-price-container
+    image: 2uangthor/gold-price-service
+    ports:
+      - "3001:3001"
+
+  exchange-rate-service:
+    container_name: exchange-rate-container
+    image: 2uangthor/exchange-rate-service
+    ports:
+      - "3002:3002" 
