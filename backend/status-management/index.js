@@ -41,10 +41,16 @@ async function checkEndpointStatus(url) {
     }
 }
 
-app.get('/status', async (req, res) => {
+app.get('/status/containerStatus', async (req, res) => {
     const statuses = {
         goldPriceContainer: await checkContainerStatus('gold-price-container'),
         exchangeRateContainer: await checkContainerStatus('exchange-rate-container'),
+    };
+    res.json(statuses);
+});
+
+app.get('/status/endpointStatus', async (req, res) => {
+    const statuses = {
         goldPriceEndpoint: await checkEndpointStatus('http://localhost:3001/gold-price'),
         exchangeRateEndpoint: await checkEndpointStatus('http://localhost:3002/exchange-rate'),
     };
