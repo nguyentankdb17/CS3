@@ -10,7 +10,7 @@ Pull 2 docker images in Dockerhub:
 - 2uangthor/exchange-rate-service
 - 2uangthor/gold-price-service
 
-At all folder of service in backend folder and at frontend folder run this code to install all nessesary node_modules. 
+At all folder of service in backend folder and at frontend folder run this code to install all nessesary node_modules:
 ### `npm install`
 \
 To start service or start frontend:
