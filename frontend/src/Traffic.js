@@ -36,7 +36,7 @@ function Traffic() {
     };
 
     useEffect(() => {
-        fetch('http://localhost:3006/traffic-gateway-aggregation')
+        fetch('http://localhost:5000/traffic-data')
             .then((response) => response.json())
             .then((data) => {
                 const processTrafficData = (trafficData) => {
