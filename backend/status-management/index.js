@@ -11,13 +11,13 @@ const port = 3003;
 // Giới hạn yêu cầu (Rate Limiting) cho từng loại giám sát
 const containerRateLimiter = rateLimit({
     windowMs: 10000, // 10 giây
-    max: 3, // Tối đa 3 yêu cầu mỗi 10 giây cho /status/containerStatus
+    max: 10, // Tối đa 3 yêu cầu mỗi 10 giây cho /status/containerStatus
     message: 'Quá nhiều yêu cầu kiểm tra container, hãy thử lại sau.'
 });
 
 const endpointRateLimiter = rateLimit({
     windowMs: 10000, // 10 giây
-    max: 3, // Tối đa 3 yêu cầu mỗi 10 giây cho /status/endpointStatus
+    max: 10, // Tối đa 3 yêu cầu mỗi 10 giây cho /status/endpointStatus
     message: 'Quá nhiều yêu cầu kiểm tra endpoint, hãy thử lại sau.'
 });
 
