@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 const timeout = require('express-timeout-handler');
 const app = express();
 
-const port = 3005;
+const port = 4004;
 
 // Giới hạn số lượng yêu cầu đồng thời cho mỗi dịch vụ (rate limiting)
 const logsRateLimiter = rateLimit({

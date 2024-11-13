@@ -10,7 +10,7 @@ function EndpointStatus() {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            fetch("http://localhost:5000/endpoint-status")
+            fetch("http://localhost:4000/endpoint-status")
                 .then(response => response.json())
                 .then(data => setStatus(data))
                 .catch(error => console.error('Error fetching status:', error));

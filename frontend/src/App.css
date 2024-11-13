@@ -124,14 +124,8 @@ td {
   flex: 1;
 }
 
-.disk {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.disk > div {
-  flex: 1;
+.resource-item > div {
+  margin-bottom: 50px;
 }
 
 /* Responsive */

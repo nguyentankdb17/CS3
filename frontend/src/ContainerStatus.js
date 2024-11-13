@@ -10,7 +10,7 @@ function ContainerStatus() {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            fetch("http://localhost:5000/container-status")
+            fetch("http://localhost:4000/container-status")
                 .then(response => response.json())
                 .then(data => setStatus(data))
                 .catch(error => console.error('Error fetching status:', error));

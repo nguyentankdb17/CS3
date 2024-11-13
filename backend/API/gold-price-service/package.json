@@ -1,13 +1,14 @@
 {
   "name": "gold-price-service",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "dependencies": {
-    "express": "^4.18.0",
-    "axios": "^0.27.2"
+    "axios": "^0.27.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "sponsor": {
     "url": "https:"

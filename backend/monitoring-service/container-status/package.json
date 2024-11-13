@@ -1,7 +1,7 @@
 {
   "name": "status-management",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "dependencies": {
     "axios": "^0.27.2",
     "dockerode": "^4.0.2",
@@ -10,7 +10,7 @@
     "express-timeout-handler": "^2.2.2"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "sponsor": {
     "url": "https:"
