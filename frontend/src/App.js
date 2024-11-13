@@ -2,8 +2,8 @@ import React from 'react';
 import {BrowserRouter as Router, Routes, Route, Link, useLocation} from 'react-router-dom';
 import './App.css';
 import Home from './Home';
-import Resources from "./Resources";
-import Traffic from "./Traffic";
+import SystemStatus from "./SystemStatus";
+import TrafficStatus from "./TrafficStatus";
 import ContainerStatus from "./ContainerStatus";
 import EndpointStatus from "./EndpointStatus";
 
@@ -27,10 +27,10 @@ function Nav() {
                       Status</Link>
               </li>
               <li>
-                  <Link to="/traffic" className={location.pathname === '/traffic' ? 'active' : ''}>Traffic</Link>
+                  <Link to="/trafficStatus" className={location.pathname === '/trafficStatus' ? 'active' : ''}>Traffic</Link>
               </li>
               <li>
-                  <Link to="/resources" className={location.pathname === '/resources' ? 'active' : ''}>Resources</Link>
+                  <Link to="/systemStatus" className={location.pathname === '/systemStatus' ? 'active' : ''}>Resources</Link>
               </li>
           </ul>
       </nav>
@@ -50,8 +50,8 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/containerStatus" element={<ContainerStatus />} />
                         <Route path="/endpointStatus" element={<EndpointStatus />} />
-                        <Route path="/traffic" element={<Traffic />} />
-                        <Route path="/resources" element={<Resources />} />
+                        <Route path="/trafficStatus" element={<TrafficStatus />} />
+                        <Route path="/systemStatus" element={<SystemStatus />} />
                     </Routes>
                 </main>
             </div>

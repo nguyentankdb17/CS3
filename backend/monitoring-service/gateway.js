@@ -3,7 +3,7 @@ const axios = require('axios');
 const app = express();
 const PORT = 5000;
 
-app.get('/traffic-data', async (req, res) => {
+app.get('/traffic-status', async (req, res) => {
     try {
         const [goldPriceResponse, exchangeRateResponse] = await Promise.all([
             axios.get('http://localhost:3005/traffic-data/gold-price-service'),
@@ -42,7 +42,7 @@ app.get('/endpoint-status', async (req, res) => {
     }
 });
 
-app.get('/resource-data', async (req, res) => {
+app.get('/system-status', async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -85,4 +85,3 @@ app.get('/resource-data', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Common Gateway running on http://localhost:${PORT}`);
 });
-

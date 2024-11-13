@@ -124,16 +124,6 @@ td {
   flex: 1;
 }
 
-.disk {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.disk > div {
-  flex: 1;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .container {

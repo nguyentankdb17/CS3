@@ -1,9 +1,8 @@
 {
-  "name": "resource-info",
+  "name": "endpoint-status",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,8 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^4.21.1",
-    "fast-cli": "^4.0.0",
-    "node-disk-info": "^1.3.0"
+    "cors": "^2.8.5",
+    "axios": "^0.27.2",
+    "express": "^4.18.0"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "status-management",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
+    "express": "^4.21.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "sponsor": {
+    "url": "https:"
+  }
+}

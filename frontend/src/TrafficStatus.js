@@ -4,7 +4,7 @@ import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import 'chartjs-adapter-moment';
 
-function Traffic() {
+function TrafficStatus() {
     const [trafficData, setTrafficData] = useState({
         exchangeRateTraffic: {
             labels: [],
@@ -83,4 +83,4 @@ function Traffic() {
     );
 }
 
-export default Traffic;
+export default TrafficStatus;

@@ -1,10 +1,6 @@
-// Cài đặt ExpressJS
 const express = require('express');
-const os = require('os');
-const { getDiskInfo } = require('node-disk-info');
-const {exec} = require("child_process");
 const app = express();
-const PORT = 3004;
+const PORT = 4003;
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); 

@@ -1,8 +1,9 @@
 const axios = require('axios');
 const express = require('express');
 const app = express();
+const CircuitBreaker = require('opossum');
 
-const port = 3005;
+const port = 4004;
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,7 +17,7 @@ let goldPriceLogs = null;
 
 async function retrieveLogs(service, url) {
     try {
-        const response = await axios.get(`${url}/traffic-data`);
+        const response = await axios.get(`${url}/health/trafficLog`);
         if (response.status === 200) {
             const data = response.data;
             console.log(`Dữ liệu từ ${url} đã được lấy thành công`);
@@ -37,9 +38,19 @@ async function retrieveLogs(service, url) {
     }
 }
 
+const breakerOptions = {
+    timeout: 5000,
+    errorThresholdPercentage: 50,
+    resetTimeout: 10000
+};
+
+const breaker = new CircuitBreaker(retrieveLogs, breakerOptions);
+
 app.get('/traffic-data/gold-price-service', async (req, res) => {
     try {
-        await retrieveLogs('gold-price-service', 'http://localhost:3001');
+        await breaker.fire('gold-price-service', 'http://localhost:3001')
+            .then(console.log)
+            .catch(console.error);
 
         res.json({
             gp_traffic_data: goldPriceLogs
@@ -51,7 +62,10 @@ app.get('/traffic-data/gold-price-service', async (req, res) => {
 
 app.get('/traffic-data/exchange-rate-service', async (req, res) => {
     try {
-        await retrieveLogs('exchange-rate-service', 'http://localhost:3002');
+        await breaker.fire('exchange-rate-service', 'http://localhost:3002')
+            .then(console.log)
+            .catch(console.error);
+
         res.json({
             ex_traffic_data: exchangeRateLogs
         });
