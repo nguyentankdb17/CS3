@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
     "chart.js": "^4.0.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-adapter-moment": "^1.0.1",
     "fast-xml-parser": "^4.5.0",
     "react": "^18.3.1",

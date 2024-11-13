@@ -124,6 +124,10 @@ td {
   flex: 1;
 }
 
+.resource-item > div {
+  margin-bottom: 50px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {
