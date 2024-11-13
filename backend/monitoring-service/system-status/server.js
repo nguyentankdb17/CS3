@@ -1,17 +1,16 @@
 const express = require('express');
-const os = require('os');
-const { getDiskInfo } = require('node-disk-info');
-const { exec } = require("child_process");
 const rateLimit = require('express-rate-limit');
 const timeout = require('express-timeout-handler');
+const Docker = require('dockerode');
+const docker = new Docker();
 
 const app = express();
-const PORT = 3004;
+const PORT = 4003;
 
 // Rate Limiting cho tài nguyên
 const resourceRateLimiter = rateLimit({
     windowMs: 10000, // 10 giây
-    max: 3, // Tối đa 3 yêu cầu mỗi 10 giây cho tài nguyên
+    max: 20, // Tối đa 3 yêu cầu mỗi 10 giây cho tài nguyên
     message: 'Quá nhiều yêu cầu giám sát tài nguyên, hãy thử lại sau.'
 });
 
@@ -28,63 +27,119 @@ app.use((req, res, next) => {
     next();
 });
 
-// Giám sát tài nguyên RAM
-app.get('/resource-data/ram-usage', resourceRateLimiter, timeout.handler(timeoutConfig), (req, res) => {
-    const totalMemory = os.totalmem() / (1024 ** 3);
-    const freeMemory = os.freemem() / (1024 ** 3);
-    const usedMemory = totalMemory - freeMemory;
-    const usagePercent = (usedMemory / totalMemory) * 100;
+let systemStats = {
+    cpuTotal: 0,
+    cpuPercent: 0,
+    memoryUsage: 0,
+    memoryLimit: 0,
+    netInput: 0,
+    netOutput: 0,
+    blockInput: 0,
+    blockOutput: 0
+};
+
+// Giám sát cpu usage
+app.get('/resource-data/cpu-usage', resourceRateLimiter, timeout.handler(timeoutConfig), async (req, res) => {
+    try {
+        const containers = await docker.listContainers();
+
+        for (const containerInfo of containers) {
+            const container = docker.getContainer(containerInfo.Id);
+            const stream = await container.stats({ stream: false });
+
+            //Tính tổng số CPU cores được cấp phát
+            const numCpus = stream.cpu_stats.online_cpus || 1;
+            systemStats.cpuTotal = numCpus;
+
+            // Tính toán CPU %
+            const cpuDelta = stream.cpu_stats.cpu_usage.total_usage - stream.precpu_stats.cpu_usage.total_usage;
+            const systemDelta = stream.cpu_stats.system_cpu_usage - stream.precpu_stats.system_cpu_usage;
+            const cpuPercent = (cpuDelta / systemDelta) * numCpus * 100;
+            systemStats.cpuPercent += cpuPercent;
+        }
+
+    } catch (error) {
+        console.error("Error accessing container:", error);
+    }
 
     res.json({
-        totalMemory: totalMemory.toFixed(1),
-        usedMemory: usedMemory.toFixed(1),
-        freeMemory: freeMemory.toFixed(1),
-        usagePercent: usagePercent.toFixed(2)
-    });
+        cpuTotal: systemStats.cpuTotal,
+        cpuPercent: systemStats.cpuPercent,
+    })
+
+});
+
+// Giám sát memory usage
+app.get('/resource-data/memory-usage', resourceRateLimiter, timeout.handler(timeoutConfig), async (req, res) => {
+    try {
+        const containers = await docker.listContainers();
+
+        for (const containerInfo of containers) {
+            const container = docker.getContainer(containerInfo.Id);
+            const stream = await container.stats({ stream: false });
+
+            // Tính toán memory
+            systemStats.memoryUsage += stream.memory_stats.usage;
+            systemStats.memoryLimit = stream.memory_stats.limit;
+        }
+    } catch (error) {
+        console.error("Error accessing container:", error);
+    }
+
+    res.json({
+        memoryUsage: systemStats.memoryUsage,
+        memoryLimit: systemStats.memoryLimit,
+    })
 });
 
 // Giám sát disk usage
 app.get('/resource-data/disk-usage', resourceRateLimiter, timeout.handler(timeoutConfig), async (req, res) => {
     try {
-        const disks = await getDiskInfo();
-        const diskInfo = disks.map(disk => ({
-            mounted: disk.mounted,
-            total: (disk.blocks / (1024 ** 3)).toFixed(2),
-            used: (disk.used / (1024 ** 3)).toFixed(2),
-            available: (disk.available / (1024 ** 3)).toFixed(2),
-            capacity: disk.capacity
-        }));
+        const containers = await docker.listContainers();
 
-        res.json(diskInfo);
+        for (const containerInfo of containers) {
+            const container = docker.getContainer(containerInfo.Id);
+            const stream = await container.stats({ stream: false });
+
+            // Tính disk (Block I/O)
+            systemStats.blockInput += stream.blkio_stats.io_service_bytes_recursive?.find(i => i.op === 'Read')?.value || 0;
+            systemStats.blockOutput += stream.blkio_stats.io_service_bytes_recursive?.find(i => i.op === 'Write')?.value || 0;
+        }
     } catch (error) {
-        console.error('Error fetching disk usage:', error);
-        res.status(500).json({ error: 'Error fetching disk usage' });
+        console.error("Error accessing container:", error);
     }
+
+    res.json({
+        dataRead: systemStats.blockInput,
+        dataWritten: systemStats.blockOutput,
+    })
 });
 
 // Giám sát băng thông Internet
-app.get('/resource-data/internet-bandwidth', resourceRateLimiter, timeout.handler(timeoutConfig), (req, res) => {
-    exec('fast --upload --json', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error: ${error.message}`);
-            return res.status(500).json({ error: 'Error fetching internet speed' });
+app.get('/resource-data/internet-bandwidth', resourceRateLimiter, timeout.handler(timeoutConfig), async (req, res) => {
+    try {
+        const containers = await docker.listContainers();
+
+        for (const containerInfo of containers) {
+            const container = docker.getContainer(containerInfo.Id);
+            const stream = await container.stats({ stream: false });
+
+            // Tính băng thông mạng (Net I/O)
+            if (stream.networks) {
+                for (const network of Object.values(stream.networks)) {
+                    systemStats.netInput += network.rx_bytes;
+                    systemStats.netOutput += network.tx_bytes;
+                }
+            }
         }
-        if (stderr) {
-            console.error(`Stderr: ${stderr}`);
-            return res.status(500).json({ error: 'Error in fast-cli output' });
-        }
-        try {
-            const speedData = JSON.parse(stdout);
-            res.json({
-                download: speedData.downloadSpeed,
-                upload: speedData.uploadSpeed,
-                ping: speedData.latency
-            });
-        } catch (parseError) {
-            console.error(`Parse Error: ${parseError.message}`);
-            res.status(500).json({ error: 'Error parsing fast-cli output' });
-        }
-    });
+    } catch (error) {
+        console.error("Error accessing container:", error);
+    }
+
+    res.json({
+        dataIn: systemStats.netInput,
+        dataOut: systemStats.netOutput,
+    })
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
