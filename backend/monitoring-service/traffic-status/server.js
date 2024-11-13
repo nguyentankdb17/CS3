@@ -1,10 +1,25 @@
 const axios = require('axios');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
+const timeout = require('express-timeout-handler');
 const app = express();
-const CircuitBreaker = require('opossum');
 
-const port = 4004;
+const port = 3005;
 
+// Giới hạn số lượng yêu cầu đồng thời cho mỗi dịch vụ (rate limiting)
+const logsRateLimiter = rateLimit({
+    windowMs: 10000, // 10 giây
+    max: 3, // Tối đa 3 yêu cầu mỗi 10 giây
+    message: 'Quá nhiều yêu cầu, hãy thử lại sau.'
+});
+
+// Timeout config cho mỗi yêu cầu (5 giây)
+const timeoutConfig = {
+    timeout: 5000, // 5 giây timeout
+    onTimeout: (req, res) => res.status(503).send('Yêu cầu hết thời gian chờ. Vui lòng thử lại sau.')
+};
+
+// Middleware cấu hình CORS
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -15,9 +30,10 @@ app.use((req, res, next) => {
 let exchangeRateLogs = null;
 let goldPriceLogs = null;
 
+// Hàm lấy logs từ các dịch vụ
 async function retrieveLogs(service, url) {
     try {
-        const response = await axios.get(`${url}/health/trafficLog`);
+        const response = await axios.get(`${url}/traffic-data`);
         if (response.status === 200) {
             const data = response.data;
             console.log(`Dữ liệu từ ${url} đã được lấy thành công`);
@@ -38,20 +54,10 @@ async function retrieveLogs(service, url) {
     }
 }
 
-const breakerOptions = {
-    timeout: 5000,
-    errorThresholdPercentage: 50,
-    resetTimeout: 10000
-};
-
-const breaker = new CircuitBreaker(retrieveLogs, breakerOptions);
-
-app.get('/traffic-data/gold-price-service', async (req, res) => {
+// API endpoint giám sát logs từ dịch vụ gold-price-service với Bulkhead
+app.get('/traffic-data/gold-price-service', logsRateLimiter, timeout.handler(timeoutConfig), async (req, res) => {
     try {
-        await breaker.fire('gold-price-service', 'http://localhost:3001')
-            .then(console.log)
-            .catch(console.error);
-
+        await retrieveLogs('gold-price-service', 'http://localhost:3001');
         res.json({
             gp_traffic_data: goldPriceLogs
         });
@@ -60,12 +66,10 @@ app.get('/traffic-data/gold-price-service', async (req, res) => {
     }
 });
 
-app.get('/traffic-data/exchange-rate-service', async (req, res) => {
+// API endpoint giám sát logs từ dịch vụ exchange-rate-service với Bulkhead
+app.get('/traffic-data/exchange-rate-service', logsRateLimiter, timeout.handler(timeoutConfig), async (req, res) => {
     try {
-        await breaker.fire('exchange-rate-service', 'http://localhost:3002')
-            .then(console.log)
-            .catch(console.error);
-
+        await retrieveLogs('exchange-rate-service', 'http://localhost:3002');
         res.json({
             ex_traffic_data: exchangeRateLogs
         });
@@ -74,6 +78,7 @@ app.get('/traffic-data/exchange-rate-service', async (req, res) => {
     }
 });
 
+// Lắng nghe kết nối trên port
 app.listen(port, () => {
     console.log(`Traffic logs service running on http://localhost:${port}`);
 });
