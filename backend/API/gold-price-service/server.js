@@ -11,7 +11,7 @@ app.get('/gold-price', async (req, res) => {
     const response = await axios.get('http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v');
     const goldPrice = response.data;
     res.json({ goldPrice });
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toLocaleTimeString();
     console.log('Time API is called:', timestamp);
   } catch (error) {
     res.status(500).json({ message: 'Error to get API gold price.' });

@@ -19,7 +19,7 @@ app.get('/exchange-rate', async (req, res) => {
 
             res.json(result);
         });
-        const timestamp = new Date().toISOString();
+        const timestamp = new Date().toLocaleTimeString();
         console.log('Time API is called:', timestamp);
     } catch (error) {
         res.status(500).json({ message: 'Error to get API exchange rate.' });
