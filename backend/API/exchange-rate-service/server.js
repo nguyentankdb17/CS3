@@ -19,8 +19,9 @@ app.get('/exchange-rate', async (req, res) => {
 
             res.json(result);
         });
-        const timestamp = new Date();
-        console.log('Time API is called:', timestamp);
+
+        console.log('Time API is called:', new Date());
+
     } catch (error) {
         res.status(500).json({ message: 'Error to get API exchange rate.' });
     }
