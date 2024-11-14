@@ -72,8 +72,10 @@ function SystemStatus() {
         scales: {
             y: {
                 ticks: {
+                    beginAtZero: true,
+                    min: 0,
                     callback: function(value) {
-                        return `${value} %`; // Thêm đơn vị KB vào cột y
+                        return `${value} %`;
                     }
                 },
                 title: {
@@ -88,11 +90,14 @@ function SystemStatus() {
         scales: {
             y: {
                 ticks: {
+                    beginAtZero: true,
+                    min: 0,
                     callback: function(value) {
-                        return `${value} MB`; // Thêm đơn vị KB vào cột y
+                        return `${value} MB`;
                     }
                 },
                 title: {
+                    beginAtZero: true,
                     display: true,
                     text: 'Memory Usage'
                 }
@@ -104,8 +109,10 @@ function SystemStatus() {
         scales: {
             y: {
                 ticks: {
+                    beginAtZero: true,
+                    min: 0,
                     callback: function(value) {
-                        return `${value} B`; // Thêm đơn vị KB vào cột y
+                        return `${value} B`;
                     }
                 },
                 title: {
@@ -120,8 +127,9 @@ function SystemStatus() {
         scales: {
             y: {
                 ticks: {
+                    min: 0,
                     callback: function(value) {
-                        return `${value} KB`; // Thêm đơn vị KB vào cột y
+                        return `${value} KB`;
                     }
                 },
                 title: {
