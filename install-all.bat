@@ -1,0 +1,8 @@
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/API/exchange-rate-service && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/API/gold-price-service && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/monitoring-service/container-status && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/monitoring-service/endpoint-status && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/monitoring-service/traffic-status && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/monitoring-service/system-status && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd backend/monitoring-service && npm i'"
+powershell -Command "Start-Process cmd -ArgumentList '/c cd frontend && npm i'"
