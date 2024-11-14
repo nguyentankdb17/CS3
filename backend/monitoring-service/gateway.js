@@ -1,11 +1,16 @@
 const express = require('express');
 const axios = require('axios');
-const app = express();
-const PORT = 4000;
+const cors = require('cors');
 const CircuitBreaker = require('opossum');
 
+const app = express();
+app.use(cors());
+
+const PORT = 4000;
+
+
 const options = {
-    timeout: 50000, // If our function takes longer than 5 seconds, trigger a failure
+    timeout: 10000, // If our function takes longer than 10 seconds, trigger a failure
     errorThresholdPercentage: 50, // When 50% of requests fail, trip the circuit
     resetTimeout: 30000 // After 30 seconds, try again.
 };
@@ -16,38 +21,25 @@ app.get('/container-status', (req, res) => {
     // Gọi hàm thông qua circuit breaker
     containerStatusBreaker.fire()
         .then((statusData) => {
-            res.json(statusData);
+            const responseData = statusData.data;
+            res.json(responseData);
         })
         .catch((error) => {
-            console.error('Error fetching container status data');
-            res.status(500).json({ error: 'Error fetching container status data' });
+            console.error('Error fetching container status data:', error);
         });
 });
 
-
-function fetchEndpointStatus() {
-    return new Promise(async (resolve, reject) => {
-        await axios.get('http://localhost:4002/status/endpointStatus')
-            .then((response) => {
-                resolve(response.data);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-const endpointStatusBreaker = new CircuitBreaker(fetchEndpointStatus, options);
+const endpointStatusBreaker = new CircuitBreaker(async() => await axios.get('http://localhost:4002/status/endpointStatus'), options);
 
 app.get('/endpoint-status', async (req, res) => {
     // Gọi hàm thông qua circuit breaker
     endpointStatusBreaker.fire()
         .then((statusData) => {
-            res.json(statusData);
+            const responseData = statusData.data;
+            res.json(responseData);
         })
         .catch((error) => {
-            console.error('Error fetching endpoint status data');
-            res.status(500).json({ error: 'Error fetching endpoint status data' });
+            console.error('Error fetching endpoint status data', error);
         });
 });
 
@@ -70,8 +62,7 @@ app.get('/system-status', (req, res) => {
         }
     };
 
-    // Fetch every 5 seconds
-    const interval = setInterval(() => {
+    const fetchData = () => {
         cpuBreaker.fire()
             .then(response => sendData('cpuData', response.data))
             .catch(error => {
@@ -99,7 +90,12 @@ app.get('/system-status', (req, res) => {
                 console.error('Error fetching bandwidth data:', error);
                 sendData('error', { message: 'Error fetching bandwidth data' });
             });
-    }, 5000);
+    }
+
+    fetchData();
+
+    // Fetch every 5 seconds
+    const interval = setInterval(fetchData, 5000);
 
     req.on('close', () => {
         clearInterval(interval);
@@ -107,25 +103,54 @@ app.get('/system-status', (req, res) => {
     });
 });
 
+const gpTrafficBreaker = new CircuitBreaker(async () => await axios.get('http://localhost:4004/traffic-data/gold-price-service'), options);
+const erTrafficBreaker = new CircuitBreaker(async () => await axios.get('http://localhost:4004/traffic-data/exchange-rate-service'), options);
 
-// app.get('/traffic-status', async (req, res) => {
-//     try {
-//         const [goldPriceResponse, exchangeRateResponse] = await Promise.all([
-//             axios.get('http://localhost:3005/traffic-data/gold-price-service'),
-//             axios.get('http://localhost:3005/traffic-data/exchange-rate-service')
-//         ]);
-//
-//         const aggregatedData = {
-//             goldPriceTraffic: goldPriceResponse.data.gp_traffic_data,
-//             exchangeRateTraffic: exchangeRateResponse.data.ex_traffic_data
-//         };
-//
-//         res.json(aggregatedData);
-//     } catch (error) {
-//         console.error('Error fetching traffic data:', error);
-//         res.status(500).json({ error: 'Error fetching traffic data' });
-//     }
-// });
+app.get('/traffic-status', async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sendData = (event, data) => {
+        if (data !== undefined && data !== null) {
+            res.write(`event: ${event}\n`);
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        } else {
+            console.error(`Invalid data: ${data}`);
+        }
+    };
+
+    const fetchData = () => {
+        gpTrafficBreaker.fire()
+            .then(response => {
+                sendData('gpTrafficData', response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching Gold Price Service traffic data:', error);
+                sendData('gpTrafficData', { message: 'Error fetching Gold Price Service traffic data' });
+            });
+
+        erTrafficBreaker.fire()
+            .then(response => {
+                sendData('erTrafficData', response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching Exchange Rate Service traffic data:', error);
+                sendData('erTrafficData', { message: 'Error fetching Exchange Rate Service traffic data' });
+            });
+    };
+
+    fetchData();
+
+    //Fetch every 60 seconds
+    const interval = setInterval(fetchData, 60000);
+
+    req.on('close', () => {
+        clearInterval(interval);
+        res.end();
+    });
+});
+
 
 app.listen(PORT, () => {
     console.log(`Common Gateway running on http://localhost:${PORT}`);

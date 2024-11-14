@@ -1,10 +1,14 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const timeout = require('express-timeout-handler');
+const cors = require('cors');
 const Docker = require('dockerode');
+
 const docker = new Docker();
 
 const app = express();
+app.use(cors());
+
 const PORT = 4003;
 
 // Rate Limiting cho tài nguyên
