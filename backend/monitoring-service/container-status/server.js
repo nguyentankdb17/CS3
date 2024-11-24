@@ -17,7 +17,7 @@ async function checkContainerStatus(containerName) {
 
         return isRunning ? "up" : "down";
     } catch (error) {
-        return "error to check";
+        return "down";
     }
 }
 

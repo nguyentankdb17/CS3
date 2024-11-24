@@ -12,7 +12,7 @@ async function checkEndpointStatus(url) {
         const response = await axios.get(url);
         return response.status === 200 ? "up" : "down";
     } catch (error) {
-        return "error to check";
+        return "down";
     }
 }
 
