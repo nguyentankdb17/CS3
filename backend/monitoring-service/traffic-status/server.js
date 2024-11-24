@@ -15,7 +15,7 @@ const docker = new Docker();
 // Giới hạn số lượng yêu cầu đồng thời cho mỗi dịch vụ (rate limiting)
 const logsRateLimiter = rateLimit({
     windowMs: 10000, // 10 giây
-    max: 3, // Tối đa 3 yêu cầu mỗi 10 giây
+    max: 20, // Tối đa 20 yêu cầu mỗi 10 giây
     message: 'Quá nhiều yêu cầu, hãy thử lại sau.'
 });
 
