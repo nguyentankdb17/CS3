@@ -1,0 +1,24 @@
+services:
+  container-status:
+    container_name: container-status
+    image: nguyentankdb17/api_monitoring_app/container-status
+    ports:
+      - "4001:4001"
+
+  endpoint-status:
+    container_name: endpoint-status
+    image: nguyentankdb17/api_monitoring_app/endpoint-status
+    ports:
+      - "4002:4002"
+  
+  system-status:
+    container_name: system-status
+    image: nguyentankdb17/api_monitoring_app/system-status
+    ports:
+      - "4003:4003" 
+
+  traffic-status:
+    container_name: traffic-status
+    image: nguyentankdb17/api_monitoring_app/traffic-status
+    ports:
+      - "4004:4004"
