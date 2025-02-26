@@ -1,0 +1,36 @@
+services:
+  container-status:
+    container_name: container-status
+    build: ./backend/monitoring-service/container-status
+    ports:
+      - "4001:4001"
+
+  endpoint-status:
+    container_name: endpoint-status
+    build: ./backend/monitoring-service/endpoint-status
+    ports:
+      - "4002:4002"
+  
+  system-status:
+    container_name: system-status
+    build: ./backend/monitoring-service/system-status
+    ports:
+      - "4003:4003"
+
+  traffic-status:
+    container_name: traffic-status
+    build: ./backend/monitoring-service/traffic-status
+    ports:
+      - "4004:4004"
+
+  gateway-backend:
+    container_name: gateway-backend
+    build: ./backend/monitoring-service
+    ports:
+      - "4000:4000"
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - "3000:3000"
